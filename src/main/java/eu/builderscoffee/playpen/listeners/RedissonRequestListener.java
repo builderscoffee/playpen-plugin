@@ -37,13 +37,11 @@ public class RedissonRequestListener implements PubSubListener {
             val servers = new ArrayList<String>();
             Network.get().getCoordinators().values().forEach(c -> c.getServers().values().forEach(s -> servers.add(s.getName())));
 
-            val resonse = new ResponseServersPacket();
-            resonse.setDestinationServerName(rsp.getServerName());
-            resonse.setServers(servers);
+            val response = new ResponseServersPacket((RedissonRequestPacket) packet);
+            response.setDestinationServerName(rsp.getServerName());
+            response.setServers(servers);
 
-            Redis.publish(RedisTopic.REDISSON, resonse);
-
-            LogUtils.info("publish");
+            Redis.publish(RedisTopic.REDISSON, response);
         }
     }
 }
