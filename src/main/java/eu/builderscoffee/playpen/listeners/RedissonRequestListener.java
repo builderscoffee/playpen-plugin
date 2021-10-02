@@ -4,10 +4,9 @@ import eu.builderscoffee.api.common.redisson.Redis;
 import eu.builderscoffee.api.common.redisson.RedisTopic;
 import eu.builderscoffee.api.common.redisson.listeners.PubSubListener;
 import eu.builderscoffee.api.common.redisson.packets.Packet;
-import eu.builderscoffee.api.common.redisson.packets.types.RedissonPacket;
-import eu.builderscoffee.api.common.redisson.packets.types.redisson.RedissonRequestPacket;
-import eu.builderscoffee.api.common.redisson.packets.types.redisson.requests.RequestServersPacket;
-import eu.builderscoffee.api.common.redisson.packets.types.redisson.responses.ResponseServersPacket;
+import eu.builderscoffee.api.common.redisson.packets.types.RequestPacket;
+import eu.builderscoffee.api.common.redisson.packets.types.playpen.requests.ServersRequestPacket;
+import eu.builderscoffee.api.common.redisson.packets.types.playpen.responses.ServersResponsePacket;
 import eu.builderscoffee.api.common.utils.LogUtils;
 import io.playpen.core.coordinator.network.Network;
 import lombok.val;
@@ -18,27 +17,25 @@ public class RedissonRequestListener implements PubSubListener {
 
     @Override
     public void onMessage(String json) {
-        val temp = Packet.deserialize(json);
+        val packet = Packet.deserialize(json);
 
-        if (!(temp instanceof RedissonRequestPacket)) return;
-
-        val packet = (RedissonPacket) temp;
+        if (!(packet instanceof RequestPacket)) return;
 
         LogUtils.debug(String.format("Request packet received(%s) from %s", packet.getClass().getSimpleName(), packet.getServerName()));
 
-        if (temp instanceof RequestServersPacket) {
-            val rsp = (RequestServersPacket) packet;
+        if (packet instanceof ServersRequestPacket) {
+            val srp = (ServersRequestPacket) packet;
 
-            if (rsp.getServerName() == null) {
-                LogUtils.error(String.format("Request for servers: Server name empty or too short (%s)", rsp.getServerName()));
+            if (srp.getServerName() == null) {
+                LogUtils.error(String.format("Request for servers: Server name empty or too short (%s)", srp.getServerName()));
                 return;
             }
 
             val servers = new ArrayList<String>();
             Network.get().getCoordinators().values().forEach(c -> c.getServers().values().forEach(s -> servers.add(s.getName())));
 
-            val response = new ResponseServersPacket((RedissonRequestPacket) packet);
-            response.setDestinationServerName(rsp.getServerName());
+            val response = new ServersResponsePacket((RequestPacket) packet);
+            response.setDestinationServerName(srp.getServerName());
             response.setServers(servers);
 
             Redis.publish(RedisTopic.REDISSON, response);
