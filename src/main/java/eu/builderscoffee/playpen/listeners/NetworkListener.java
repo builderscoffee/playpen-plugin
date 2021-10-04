@@ -1,11 +1,16 @@
 package eu.builderscoffee.playpen.listeners;
 
+import eu.builderscoffee.api.common.redisson.Redis;
+import eu.builderscoffee.api.common.redisson.RedisTopic;
+import eu.builderscoffee.api.common.redisson.packets.types.common.BungeecordPacket;
+import eu.builderscoffee.playpen.utils.PlaypenUtils;
 import io.playpen.core.coordinator.network.INetworkListener;
 import io.playpen.core.coordinator.network.LocalCoordinator;
 import io.playpen.core.coordinator.network.Server;
 import io.playpen.core.plugin.EventManager;
 import io.playpen.core.plugin.IPlugin;
 import lombok.extern.log4j.Log4j2;
+import lombok.val;
 
 public class NetworkListener implements INetworkListener {
     @Override
@@ -34,7 +39,14 @@ public class NetworkListener implements INetworkListener {
 
     @Override
     public void onNetworkShutdown() {
-
+        PlaypenUtils.getServers().forEach(server -> {
+            val packet = new BungeecordPacket();
+            packet.setHostName(server.getName());
+            packet.setHostAddress(server.getProperties().get("ip"));
+            packet.setHostAddress(server.getProperties().get("port"));
+            packet.setServerStatus(BungeecordPacket.ServerStatus.STOPPED);
+            Redis.publish(RedisTopic.BUNGEECORD, packet);
+        });
     }
 
     @Override
@@ -53,8 +65,15 @@ public class NetworkListener implements INetworkListener {
     }
 
     @Override
-    public void onProvisionResponse(LocalCoordinator localCoordinator, Server server, boolean b) {
-
+    public void onProvisionResponse(LocalCoordinator localCoordinator, Server server, boolean success) {
+        if(success){
+            val packet = new BungeecordPacket();
+            packet.setHostName(server.getName());
+            packet.setHostAddress(server.getProperties().get("ip"));
+            packet.setHostAddress(server.getProperties().get("port"));
+            packet.setServerStatus(BungeecordPacket.ServerStatus.STARTED);
+            Redis.publish(RedisTopic.BUNGEECORD, packet);
+        }
     }
 
     @Override
@@ -64,7 +83,12 @@ public class NetworkListener implements INetworkListener {
 
     @Override
     public void onServerShutdown(LocalCoordinator localCoordinator, Server server) {
-
+        val packet = new BungeecordPacket();
+        packet.setHostName(server.getName());
+        packet.setHostAddress(server.getProperties().get("ip"));
+        packet.setHostAddress(server.getProperties().get("port"));
+        packet.setServerStatus(BungeecordPacket.ServerStatus.STOPPED);
+        Redis.publish(RedisTopic.BUNGEECORD, packet);
     }
 
     @Override
