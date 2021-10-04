@@ -8,10 +8,11 @@ import eu.builderscoffee.api.common.redisson.packets.types.RequestPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.requests.ServersRequestPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.responses.ServersResponsePacket;
 import eu.builderscoffee.api.common.utils.LogUtils;
-import io.playpen.core.coordinator.network.Network;
+import eu.builderscoffee.playpen.utils.PlaypenUtils;
+import io.playpen.core.coordinator.network.Server;
 import lombok.val;
 
-import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class RedissonRequestListener implements PubSubListener {
 
@@ -21,24 +22,23 @@ public class RedissonRequestListener implements PubSubListener {
 
         if (!(packet instanceof RequestPacket)) return;
 
-        LogUtils.debug(String.format("Request packet received(%s) from %s", packet.getClass().getSimpleName(), packet.getServerName()));
+        LogUtils.debug(String.format("Request packet received (%s) from %s", packet.getClass().getSimpleName(), packet.getServerName()));
 
         if (packet instanceof ServersRequestPacket) {
             val srp = (ServersRequestPacket) packet;
 
-            if (srp.getServerName() == null) {
-                LogUtils.error(String.format("Request for servers: Server name empty or too short (%s)", srp.getServerName()));
+            if (srp.getServerName() == null || srp.getServerName().isEmpty()) {
+                LogUtils.error(String.format("Request for servers: Server name empty (%s)", srp.getServerName()));
                 return;
             }
 
-            val servers = new ArrayList<String>();
-            Network.get().getCoordinators().values().forEach(c -> c.getServers().values().forEach(s -> servers.add(s.getName())));
-
             val response = new ServersResponsePacket((RequestPacket) packet);
             response.setDestinationServerName(srp.getServerName());
-            response.setServers(servers);
+            response.setServers(PlaypenUtils.getServers().stream()
+                    .map(Server::getName)
+                    .collect(Collectors.toList()));
 
-            Redis.publish(RedisTopic.REDISSON, response);
+            Redis.publish(RedisTopic.PLAYPEN, response);
         }
     }
 }
