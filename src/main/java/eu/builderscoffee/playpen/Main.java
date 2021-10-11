@@ -9,21 +9,15 @@ import eu.builderscoffee.playpen.listeners.NetworkListener;
 import eu.builderscoffee.playpen.listeners.RedissonActionListener;
 import eu.builderscoffee.playpen.listeners.RedissonRequestListener;
 import eu.builderscoffee.playpen.tasks.HeartbeartsTask;
-import eu.builderscoffee.playpen.utils.PlaypenUtils;
 import io.playpen.core.coordinator.CoordinatorMode;
 import io.playpen.core.coordinator.PlayPen;
 import io.playpen.core.coordinator.network.Network;
 import io.playpen.core.plugin.AbstractPlugin;
 import lombok.Getter;
-import lombok.val;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import static eu.builderscoffee.api.common.configuration.Configuration.readOrCreateConfiguration;
 

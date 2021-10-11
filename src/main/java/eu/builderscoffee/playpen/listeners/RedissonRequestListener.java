@@ -33,7 +33,7 @@ public class RedissonRequestListener implements PubSubListener {
             }
 
             val response = new ServersResponsePacket((RequestPacket) packet);
-            response.setDestinationServerName(srp.getServerName());
+            response.setTargetServerName(srp.getServerName());
             response.setServers(PlaypenUtils.getServers().stream()
                     .map(Server::getName)
                     .collect(Collectors.toList()));

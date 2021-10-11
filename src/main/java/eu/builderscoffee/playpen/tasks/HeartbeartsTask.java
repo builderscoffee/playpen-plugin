@@ -3,8 +3,9 @@ package eu.builderscoffee.playpen.tasks;
 import eu.builderscoffee.api.common.redisson.Redis;
 import eu.builderscoffee.api.common.redisson.RedisTopic;
 import eu.builderscoffee.api.common.redisson.packets.types.common.HeartBeatPacket;
-import eu.builderscoffee.api.common.redisson.serverinfos.ServerInfo;
+import eu.builderscoffee.api.common.redisson.serverinfos.Server;
 import lombok.val;
+import org.redisson.api.RSortedSet;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,16 +22,14 @@ public class HeartbeartsTask extends TimerTask {
         if(times >= maxServerInfoAlive){
             times = 0;
             val now = new Date();
-            val servers = Redis.redissonClient.getList("servers");
-            val toRemove = new ArrayList<>();
+            final RSortedSet<Server> servers = Redis.getRedissonClient().getSortedSet("servers");
+            val toRemove = new ArrayList<Server>();
             servers.stream()
-                    .filter(o -> o instanceof ServerInfo)
-                    .forEach(o -> {
-                        val si = (ServerInfo) o;
+                    .forEach(si -> {
                         long diffInMillies = Math.abs(now.getTime() - si.getLastHeartbeat().getTime());
                         long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
                         if (diff > maxServerInfoAlive * 5) {
-                            toRemove.add(o);
+                            toRemove.add(si);
                         }
                     });
             toRemove.forEach(servers::remove);

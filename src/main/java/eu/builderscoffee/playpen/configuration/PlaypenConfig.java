@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Configuration(value = "playpen")
-public class PlaypenConfig {
+public final class PlaypenConfig {
 
     boolean debugConsole = false;
 }
