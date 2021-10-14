@@ -1,6 +1,7 @@
 package eu.builderscoffee.playpen.listeners;
 
-import eu.builderscoffee.api.common.redisson.listeners.PubSubListener;
+import eu.builderscoffee.api.common.redisson.listeners.PacketListener;
+import eu.builderscoffee.api.common.redisson.listeners.ProcessPacket;
 import eu.builderscoffee.api.common.redisson.packets.Packet;
 import eu.builderscoffee.api.common.redisson.packets.types.ActionPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.DeprovisionServerPacket;
@@ -13,59 +14,54 @@ import lombok.val;
 
 import java.util.HashMap;
 
-public class RedissonActionListener implements PubSubListener {
+public class RedissonActionListener implements PacketListener {
 
-    @Override
-    public void onMessage(String json) {
-        val packet = Packet.deserialize(json);
-
-        if (!(packet instanceof ActionPacket)) return;
-
+    @ProcessPacket
+    public void onActionPacket(ActionPacket packet){
         LogUtils.debug(String.format("Action packet received (%s) from %s", packet.getClass().getSimpleName(), packet.getServerName()));
+    }
 
-        if (packet instanceof ProvisionServerPacket) {
-            val psp = (ProvisionServerPacket) packet;
+    @ProcessPacket
+    public void onProvisionServerPacket(ProvisionServerPacket psp){
+        val p3Package = Network.get().getPackageManager().resolve(psp.getNewServerPacketId(), "promoted");
 
-            val p3Package = Network.get().getPackageManager().resolve(psp.getNewServerPacketId(), "promoted");
-
-            if (psp.getNewServerName() == null || psp.getNewServerName().length() < 4) {
-                LogUtils.error(String.format("Provision from %s canceled: Server name empty or too short (%s)", psp.getServerName(), psp.getNewServerName()));
-                return;
-            }
-
-            if (p3Package == null) {
-                LogUtils.error(String.format("Provision from %s canceled: P3Package not found (%s)", psp.getServerName(), psp.getNewServerPacketId()));
-                return;
-            }
-
-            if (PlaypenUtils.existServer(psp.getNewServerName())) {
-                LogUtils.error(String.format("Provision from %s canceled: Server with name %s already exist", psp.getServerName(), psp.getNewServerName()));
-                return;
-            }
-
-            Network.get().provision(p3Package, psp.getNewServerName(), psp.getNewServerProperties() == null ? new HashMap<>() : psp.getNewServerProperties());
+        if (psp.getNewServerName() == null || psp.getNewServerName().length() < 4) {
+            LogUtils.error(String.format("Provision from %s canceled: Server name empty or too short (%s)", psp.getServerName(), psp.getNewServerName()));
+            return;
         }
-        else if (packet instanceof DeprovisionServerPacket) {
-            val dsp = (DeprovisionServerPacket) packet;
 
-            if (!PlaypenUtils.existServer(dsp.getTargetServerName())) {
-                LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", dsp.getServerName(), dsp.getTargetServerName()));
-                return;
-            }
-
-            val server = PlaypenUtils.getServer(dsp.getTargetServerName());
-            Network.get().deprovision(server.getCoordinator().getUuid(), server.getUuid());
+        if (p3Package == null) {
+            LogUtils.error(String.format("Provision from %s canceled: P3Package not found (%s)", psp.getServerName(), psp.getNewServerPacketId()));
+            return;
         }
-        else if (packet instanceof FreezeServerPacket) {
-            val dsp = (FreezeServerPacket) packet;
 
-            if (!PlaypenUtils.existServer(dsp.getTargetServerName())) {
-                LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", dsp.getServerName(), dsp.getTargetServerName()));
-                return;
-            }
-
-            val server = PlaypenUtils.getServer(dsp.getTargetServerName());
-            Network.get().freezeServer(server.getCoordinator().getUuid(), server.getUuid());
+        if (PlaypenUtils.existServer(psp.getNewServerName())) {
+            LogUtils.error(String.format("Provision from %s canceled: Server with name %s already exist", psp.getServerName(), psp.getNewServerName()));
+            return;
         }
+
+        Network.get().provision(p3Package, psp.getNewServerName(), psp.getNewServerProperties() == null ? new HashMap<>() : psp.getNewServerProperties());
+    }
+
+    @ProcessPacket
+    public void onFreezeServerPacket(FreezeServerPacket fsp){
+        if (!PlaypenUtils.existServer(fsp.getTargetServerName())) {
+            LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", fsp.getServerName(), fsp.getTargetServerName()));
+            return;
+        }
+
+        val server = PlaypenUtils.getServer(fsp.getTargetServerName());
+        Network.get().freezeServer(server.getCoordinator().getUuid(), server.getUuid());
+    }
+
+    @ProcessPacket
+    public void onDeprovisionServerPacket(DeprovisionServerPacket dsp){
+        if (!PlaypenUtils.existServer(dsp.getTargetServerName())) {
+            LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", dsp.getServerName(), dsp.getTargetServerName()));
+            return;
+        }
+
+        val server = PlaypenUtils.getServer(dsp.getTargetServerName());
+        Network.get().deprovision(server.getCoordinator().getUuid(), server.getUuid());
     }
 }
