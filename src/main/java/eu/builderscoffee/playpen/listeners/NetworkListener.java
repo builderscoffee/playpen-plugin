@@ -6,10 +6,10 @@ import eu.builderscoffee.api.common.redisson.packets.types.common.BungeecordPack
 import eu.builderscoffee.playpen.utils.PlaypenUtils;
 import io.playpen.core.coordinator.network.INetworkListener;
 import io.playpen.core.coordinator.network.LocalCoordinator;
+import io.playpen.core.coordinator.network.Network;
 import io.playpen.core.coordinator.network.Server;
 import io.playpen.core.plugin.EventManager;
 import io.playpen.core.plugin.IPlugin;
-import lombok.extern.log4j.Log4j2;
 import lombok.val;
 
 public class NetworkListener implements INetworkListener {

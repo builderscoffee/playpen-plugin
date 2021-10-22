@@ -65,6 +65,9 @@ public class Main extends AbstractPlugin {
         // Tâche Heartbeats
         new Timer().scheduleAtFixedRate(new HeartbeartsTask(), 5 * 1000, 5 * 1000);
 
+        // Clear servers information
+        Redis.getRedissonClient().getSortedSet("servers").clear();
+
 
         LogUtils.debug("Starting networks listeners");
         return Network.get().getEventManager().registerListener(new NetworkListener());

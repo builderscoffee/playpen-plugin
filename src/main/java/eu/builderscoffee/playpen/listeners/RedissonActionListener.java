@@ -2,7 +2,6 @@ package eu.builderscoffee.playpen.listeners;
 
 import eu.builderscoffee.api.common.redisson.listeners.PacketListener;
 import eu.builderscoffee.api.common.redisson.listeners.ProcessPacket;
-import eu.builderscoffee.api.common.redisson.packets.Packet;
 import eu.builderscoffee.api.common.redisson.packets.types.ActionPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.DeprovisionServerPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.FreezeServerPacket;
@@ -23,7 +22,11 @@ public class RedissonActionListener implements PacketListener {
 
     @ProcessPacket
     public void onProvisionServerPacket(ProvisionServerPacket psp){
-        val p3Package = Network.get().getPackageManager().resolve(psp.getNewServerPacketId(), "promoted");
+        val version = Network.get().getPackageManager()
+                .getPackageList().stream()
+                .anyMatch(pkg->pkg.getId().equals(psp.getNewServerPacketId())
+                        && pkg.getVersion().equals(psp.getNewServerVersion()))? psp.getNewServerVersion() : "promoted";
+        val p3Package = Network.get().getPackageManager().resolve(psp.getNewServerPacketId(), version);
 
         if (psp.getNewServerName() == null || psp.getNewServerName().length() < 4) {
             LogUtils.error(String.format("Provision from %s canceled: Server name empty or too short (%s)", psp.getServerName(), psp.getNewServerName()));

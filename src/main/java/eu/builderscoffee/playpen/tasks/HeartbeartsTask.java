@@ -2,8 +2,8 @@ package eu.builderscoffee.playpen.tasks;
 
 import eu.builderscoffee.api.common.redisson.Redis;
 import eu.builderscoffee.api.common.redisson.RedisTopic;
+import eu.builderscoffee.api.common.redisson.infos.Server;
 import eu.builderscoffee.api.common.redisson.packets.types.common.HeartBeatPacket;
-import eu.builderscoffee.api.common.redisson.serverinfos.Server;
 import lombok.val;
 import org.redisson.api.RSortedSet;
 
