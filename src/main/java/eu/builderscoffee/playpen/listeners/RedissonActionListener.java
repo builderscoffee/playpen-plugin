@@ -47,7 +47,7 @@ public class RedissonActionListener implements PacketListener {
 
         val properties = psp.getNewServerProperties() == null ? new HashMap<String, String>() : psp.getNewServerProperties();
         val ip = "54.36.124.50";
-        val port = Main.getInstance().getPortsConfig().getPorts().stream()
+        val port = Main.getInstance().getPortsConfig().getPorts().parallelStream()
                 .filter(PortUtils::available)
                 .findFirst()
                 .orElse(-1);
