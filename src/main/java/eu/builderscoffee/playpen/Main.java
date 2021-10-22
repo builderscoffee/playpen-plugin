@@ -5,6 +5,7 @@ import eu.builderscoffee.api.common.redisson.RedisCredentials;
 import eu.builderscoffee.api.common.redisson.RedisTopic;
 import eu.builderscoffee.api.common.utils.LogUtils;
 import eu.builderscoffee.playpen.configuration.PlaypenConfig;
+import eu.builderscoffee.playpen.configuration.PortsConfig;
 import eu.builderscoffee.playpen.listeners.NetworkListener;
 import eu.builderscoffee.playpen.listeners.RedissonActionListener;
 import eu.builderscoffee.playpen.listeners.RedissonRequestListener;
@@ -29,6 +30,7 @@ public class Main extends AbstractPlugin {
 
     private RedisCredentials redisCredentials;
     private PlaypenConfig playerpenConfig;
+    private PortsConfig portsConfig;
 
     @Override
     public boolean onStart() {
@@ -48,6 +50,7 @@ public class Main extends AbstractPlugin {
         Configurator.setLevel("eu.builderscoffee", getPlayerpenConfig().isDebugConsole() ? Level.DEBUG : Level.INFO);
 
         // Récupère la configuration redisson
+        portsConfig = readOrCreateConfiguration(getSchema().getId(), PortsConfig.class);
         redisCredentials = readOrCreateConfiguration(getSchema().getId(), RedisCredentials.class);
         if (redisCredentials.getClientName() == null || redisCredentials.getIp() == null || redisCredentials.getPassword() == null) {
             System.out.println("");
@@ -71,5 +74,10 @@ public class Main extends AbstractPlugin {
 
         LogUtils.debug("Starting networks listeners");
         return Network.get().getEventManager().registerListener(new NetworkListener());
+    }
+
+    @Override
+    public void onStop() {
+        Redis.close();
     }
 }

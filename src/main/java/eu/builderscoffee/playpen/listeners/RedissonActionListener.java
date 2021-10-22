@@ -7,7 +7,9 @@ import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.Depro
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.FreezeServerPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.ProvisionServerPacket;
 import eu.builderscoffee.api.common.utils.LogUtils;
+import eu.builderscoffee.playpen.Main;
 import eu.builderscoffee.playpen.utils.PlaypenUtils;
+import eu.builderscoffee.playpen.utils.PortUtils;
 import io.playpen.core.coordinator.network.Network;
 import lombok.val;
 
@@ -43,7 +45,22 @@ public class RedissonActionListener implements PacketListener {
             return;
         }
 
-        Network.get().provision(p3Package, psp.getNewServerName(), psp.getNewServerProperties() == null ? new HashMap<>() : psp.getNewServerProperties());
+        val properties = psp.getNewServerProperties() == null ? new HashMap<String, String>() : psp.getNewServerProperties();
+        val ip = "54.36.124.50";
+        val port = Main.getInstance().getPortsConfig().getPorts().stream()
+                .filter(PortUtils::available)
+                .findFirst()
+                .orElse(-1);
+
+        if(port == -1){
+            LogUtils.error(String.format("Provision from %s canceled: Cannot find a free port (%s)", psp.getNewServerName()));
+            return;
+        }
+
+        properties.put("ip", ip);
+        properties.put("port", String.valueOf(port));
+
+        Network.get().provision(p3Package, psp.getNewServerName(), properties);
     }
 
     @ProcessPacket
