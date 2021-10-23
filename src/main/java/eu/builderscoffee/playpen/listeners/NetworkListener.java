@@ -70,7 +70,7 @@ public class NetworkListener implements INetworkListener {
             val packet = new BungeecordPacket();
             packet.setHostName(server.getName());
             packet.setHostAddress(server.getProperties().get("ip"));
-            packet.setHostAddress(server.getProperties().get("port"));
+            packet.setHostPort(Integer.parseInt(server.getProperties().get("port")));
             packet.setServerStatus(BungeecordPacket.ServerStatus.STARTED);
             Redis.publish(RedisTopic.BUNGEECORD, packet);
         }

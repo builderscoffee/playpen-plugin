@@ -53,7 +53,7 @@ public class RedissonActionListener implements PacketListener {
                 .orElse(-1);
 
         if(port == -1){
-            LogUtils.error(String.format("Provision from %s canceled: Cannot find a free port (%s)", psp.getNewServerName()));
+            LogUtils.error(String.format("Provision from %s canceled: Cannot find a free port (%s)", psp.getServerName(), psp.getNewServerName()));
             return;
         }
 
