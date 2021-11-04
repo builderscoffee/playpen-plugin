@@ -13,65 +13,34 @@ import eu.builderscoffee.playpen.utils.PortUtils;
 import io.playpen.core.coordinator.network.Network;
 import lombok.val;
 
-import java.util.HashMap;
-
 public class RedissonActionListener implements PacketListener {
 
     @ProcessPacket
-    public void onActionPacket(ActionPacket packet){
+    public void onActionPacket(ActionPacket packet) {
         LogUtils.debug(String.format("Action packet received (%s) from %s", packet.getClass().getSimpleName(), packet.getServerName()));
     }
 
     @ProcessPacket
-    public void onProvisionServerPacket(ProvisionServerPacket psp){
-        /*val version = Network.get().getPackageManager()
-                .getPackageList().stream()
-                .anyMatch(pkg->pkg.getId().equals(psp.getNewServerPacketId())
-                        && pkg.getVersion().equals(psp.getNewServerVersion()))? psp.getNewServerVersion() : "promoted";
-        val p3Package = Network.get().getPackageManager().resolve(psp.getNewServerPacketId(), version);
-
-        if (psp.getNewServerName() == null || psp.getNewServerName().length() < 4) {
-            LogUtils.error(String.format("Provision from %s canceled: Server name empty or too short (%s)", psp.getServerName(), psp.getNewServerName()));
-            return;
-        }
-
-        if (p3Package == null) {
-            LogUtils.error(String.format("Provision from %s canceled: P3Package not found (%s)", psp.getServerName(), psp.getNewServerPacketId()));
-            return;
-        }
-
-        if (PlaypenUtils.existServer(psp.getNewServerName())) {
-            LogUtils.error(String.format("Provision from %s canceled: Server with name %s already exist", psp.getServerName(), psp.getNewServerName()));
-            return;
-        }
-
-        val properties = psp.getNewServerProperties() == null ? new HashMap<String, String>() : psp.getNewServerProperties();
-        val ip = "54.36.124.50";
-        */
+    public void onProvisionServerPacket(ProvisionServerPacket psp) {
         val port = Main.getInstance().getPortsConfig().getPorts().parallelStream()
                 .filter(PortUtils::available)
                 .findFirst()
                 .orElse(-1);
 
-        if(port == -1){
+        if (port == -1) {
             LogUtils.error(String.format("Provision from %s canceled: Cannot find a free port (%s)", psp.getServerName(), psp.getNewServerName()));
             return;
         }
 
-        /*properties.put("name", psp.getNewServerName());
-        properties.put("ip", ip);
-        properties.put("port", String.valueOf(port));
-
-        Network.get().provision(p3Package, psp.getNewServerName(), properties);*/
-        try{
+        try {
             PlaypenUtils.provisionServer(psp.getNewServerName(), psp.getNewServerPacketId(), psp.getNewServerVersion(), "54.36.124.50", port, psp.getNewServerProperties());
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             LogUtils.error(String.format("Provision from %s canceled: " + e.getMessage(), psp.getServerName()));
         }
     }
 
     @ProcessPacket
-    public void onFreezeServerPacket(FreezeServerPacket fsp){
+    public void onFreezeServerPacket(FreezeServerPacket fsp) {
         if (!PlaypenUtils.existServer(fsp.getTargetServerName())) {
             LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", fsp.getServerName(), fsp.getTargetServerName()));
             return;
@@ -82,7 +51,7 @@ public class RedissonActionListener implements PacketListener {
     }
 
     @ProcessPacket
-    public void onDeprovisionServerPacket(DeprovisionServerPacket dsp){
+    public void onDeprovisionServerPacket(DeprovisionServerPacket dsp) {
         if (!PlaypenUtils.existServer(dsp.getServerToStop())) {
             LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", dsp.getServerName(), dsp.getTargetServerName()));
             return;

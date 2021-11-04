@@ -13,6 +13,16 @@ import java.util.TimerTask;
 
 public class StaticServersTask extends TimerTask {
 
+    private StaticServersTask(){}
+
+    private static class StaticServersTaskHolder{
+        private static final StaticServersTask INSTANCE = new StaticServersTask();
+    }
+
+    public static StaticServersTask getInstance(){
+        return StaticServersTaskHolder.INSTANCE;
+    }
+
     @Override
     public void run() {
         final RSortedSet<Server> servers = Redis.getRedissonClient().getSortedSet("servers");

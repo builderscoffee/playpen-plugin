@@ -86,7 +86,7 @@ public class Main extends AbstractPlugin {
         // Clear servers information
         Redis.getRedissonClient().getSortedSet("servers").clear();
 
-        timer.scheduleAtFixedRate(new StaticServersTask(), 10 * 1000, 10 * 1000);
+        timer.scheduleAtFixedRate(StaticServersTask.getInstance(), 10 * 1000, 30 * 1000);
 
         LogUtils.debug("Starting networks listeners");
         return Network.get().getEventManager().registerListener(new NetworkListener());

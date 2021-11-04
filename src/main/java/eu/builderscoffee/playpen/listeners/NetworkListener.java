@@ -3,6 +3,7 @@ package eu.builderscoffee.playpen.listeners;
 import eu.builderscoffee.api.common.redisson.Redis;
 import eu.builderscoffee.api.common.redisson.RedisTopic;
 import eu.builderscoffee.api.common.redisson.packets.types.common.BungeecordPacket;
+import eu.builderscoffee.playpen.tasks.StaticServersTask;
 import eu.builderscoffee.playpen.utils.PlaypenUtils;
 import io.playpen.core.coordinator.network.INetworkListener;
 import io.playpen.core.coordinator.network.LocalCoordinator;
@@ -15,21 +16,7 @@ import lombok.val;
 public class NetworkListener implements INetworkListener {
     @Override
     public void onPluginMessage(IPlugin plugin, String id, Object... args) {
-        /*if("command".equalsIgnoreCase(id)) {
-            if(args.length < 1)
-                return;
 
-            if("balance".equalsIgnoreCase(args[0].toString())) {
-                if(args.length != 1) {
-                    Network.get().pluginMessage(Main.getInstance(), "log", "balance usage:\npass balance");
-                    return;
-                }
-
-                Network.get().pluginMessage(Main.getInstance(), "log", "Triggering balance!");
-                log.info("Triggering balance from command");
-                Balancer.balance();
-            }
-        }*/
     }
 
     @Override
@@ -89,6 +76,7 @@ public class NetworkListener implements INetworkListener {
         packet.setHostAddress(server.getProperties().get("port"));
         packet.setServerStatus(BungeecordPacket.ServerStatus.STOPPED);
         Redis.publish(RedisTopic.BUNGEECORD, packet);
+        StaticServersTask.getInstance().run();
     }
 
     @Override
