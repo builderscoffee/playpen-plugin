@@ -24,7 +24,7 @@ public class RedissonActionListener implements PacketListener {
 
     @ProcessPacket
     public void onProvisionServerPacket(ProvisionServerPacket psp){
-        val version = Network.get().getPackageManager()
+        /*val version = Network.get().getPackageManager()
                 .getPackageList().stream()
                 .anyMatch(pkg->pkg.getId().equals(psp.getNewServerPacketId())
                         && pkg.getVersion().equals(psp.getNewServerVersion()))? psp.getNewServerVersion() : "promoted";
@@ -47,6 +47,7 @@ public class RedissonActionListener implements PacketListener {
 
         val properties = psp.getNewServerProperties() == null ? new HashMap<String, String>() : psp.getNewServerProperties();
         val ip = "54.36.124.50";
+        */
         val port = Main.getInstance().getPortsConfig().getPorts().parallelStream()
                 .filter(PortUtils::available)
                 .findFirst()
@@ -57,10 +58,16 @@ public class RedissonActionListener implements PacketListener {
             return;
         }
 
+        /*properties.put("name", psp.getNewServerName());
         properties.put("ip", ip);
         properties.put("port", String.valueOf(port));
 
-        Network.get().provision(p3Package, psp.getNewServerName(), properties);
+        Network.get().provision(p3Package, psp.getNewServerName(), properties);*/
+        try{
+            PlaypenUtils.provisionServer(psp.getNewServerName(), psp.getNewServerPacketId(), psp.getNewServerVersion(), "54.36.124.50", port, psp.getNewServerProperties());
+        }catch (RuntimeException e){
+            LogUtils.error(String.format("Provision from %s canceled: " + e.getMessage(), psp.getServerName()));
+        }
     }
 
     @ProcessPacket
@@ -76,12 +83,12 @@ public class RedissonActionListener implements PacketListener {
 
     @ProcessPacket
     public void onDeprovisionServerPacket(DeprovisionServerPacket dsp){
-        if (!PlaypenUtils.existServer(dsp.getTargetServerName())) {
+        if (!PlaypenUtils.existServer(dsp.getServerToStop())) {
             LogUtils.error(String.format("Deprovision from %s canceled: Server with name %s doesn't exist", dsp.getServerName(), dsp.getTargetServerName()));
             return;
         }
 
-        val server = PlaypenUtils.getServer(dsp.getTargetServerName());
+        val server = PlaypenUtils.getServer(dsp.getServerToStop());
         Network.get().deprovision(server.getCoordinator().getUuid(), server.getUuid());
     }
 }

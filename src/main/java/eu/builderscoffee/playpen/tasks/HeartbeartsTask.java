@@ -28,7 +28,7 @@ public class HeartbeartsTask extends TimerTask {
                     .forEach(si -> {
                         long diffInMillies = Math.abs(now.getTime() - si.getLastHeartbeat().getTime());
                         long diff = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-                        if (diff > maxServerInfoAlive * 5) {
+                        if (diff >= maxServerInfoAlive * 2) {
                             toRemove.add(si);
                         }
                     });
