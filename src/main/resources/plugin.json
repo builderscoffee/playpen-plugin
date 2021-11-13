@@ -1,5 +1,5 @@
 {
   "id": "plugin-playpen",
   "version": "1.0",
-  "main": "eu.builderscoffee.playpen.Main"
+  "main": "eu.builderscoffee.playpen.PlaypenPlugin"
 }

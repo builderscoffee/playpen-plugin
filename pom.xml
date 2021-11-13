@@ -38,11 +38,6 @@
                 </executions>
                 <configuration>
                     <minimizeJar>false</minimizeJar>
-                    <artifactSet>
-                        <includes>
-                            <include>eu.builderscoffee:BuildersCoffeeAPI</include>
-                        </includes>
-                    </artifactSet>
                 </configuration>
             </plugin>
         </plugins>
@@ -70,7 +65,7 @@
         </dependency>
         <dependency>
             <groupId>eu.builderscoffee</groupId>
-            <artifactId>BuildersCoffeeAPI</artifactId>
+            <artifactId>api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

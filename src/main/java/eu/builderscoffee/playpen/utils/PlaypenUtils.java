@@ -1,7 +1,5 @@
 package eu.builderscoffee.playpen.utils;
 
-import eu.builderscoffee.api.common.utils.LogUtils;
-import eu.builderscoffee.playpen.Main;
 import io.playpen.core.coordinator.network.LocalCoordinator;
 import io.playpen.core.coordinator.network.Network;
 import io.playpen.core.coordinator.network.Server;
@@ -9,9 +7,9 @@ import lombok.experimental.UtilityClass;
 import lombok.val;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class PlaypenUtils {
@@ -34,6 +32,10 @@ public class PlaypenUtils {
 
     public static LocalCoordinator getLocalCoordinatorFromServerName(String serverName) {
         return getServer(serverName).getCoordinator();
+    }
+
+    public static List<LocalCoordinator> getLocalCoordinators() {
+        return Network.get().getCoordinators().values().stream().collect(Collectors.toList());
     }
 
     public static void provisionServer(String name, String packageName, String version, String ip, int port, Map<String, String> properties) throws RuntimeException {

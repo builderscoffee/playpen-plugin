@@ -1,14 +1,10 @@
 package eu.builderscoffee.playpen.tasks;
 
-import eu.builderscoffee.api.common.redisson.Redis;
-import eu.builderscoffee.api.common.redisson.infos.Server;
 import eu.builderscoffee.api.common.utils.LogUtils;
-import eu.builderscoffee.playpen.Main;
+import eu.builderscoffee.playpen.PlaypenPlugin;
 import eu.builderscoffee.playpen.utils.PlaypenUtils;
-import org.redisson.api.RSortedSet;
 
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.TimerTask;
 
 public class StaticServersTask extends TimerTask {
@@ -25,9 +21,10 @@ public class StaticServersTask extends TimerTask {
 
     @Override
     public void run() {
-        final RSortedSet<Server> servers = Redis.getRedissonClient().getSortedSet("servers");
+        if(PlaypenUtils.getLocalCoordinators().size() == 0)
+            return;
 
-        Main.getInstance().getDefaultServersConfig().getServers().stream()
+        PlaypenPlugin.getInstance().getSettingsConfig().getServers().stream()
                 .filter(s -> !PlaypenUtils.existServer(s.getName()))
                 .forEach(s -> {
                     try {

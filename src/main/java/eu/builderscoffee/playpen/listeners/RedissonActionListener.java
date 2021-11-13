@@ -7,7 +7,7 @@ import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.Depro
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.FreezeServerPacket;
 import eu.builderscoffee.api.common.redisson.packets.types.playpen.actions.ProvisionServerPacket;
 import eu.builderscoffee.api.common.utils.LogUtils;
-import eu.builderscoffee.playpen.Main;
+import eu.builderscoffee.playpen.PlaypenPlugin;
 import eu.builderscoffee.playpen.utils.PlaypenUtils;
 import eu.builderscoffee.playpen.utils.PortUtils;
 import io.playpen.core.coordinator.network.Network;
@@ -22,7 +22,7 @@ public class RedissonActionListener implements PacketListener {
 
     @ProcessPacket
     public void onProvisionServerPacket(ProvisionServerPacket psp) {
-        val port = Main.getInstance().getPortsConfig().getPorts().parallelStream()
+        val port = PlaypenPlugin.getInstance().getSettingsConfig().getPorts().parallelStream()
                 .filter(PortUtils::available)
                 .findFirst()
                 .orElse(-1);
