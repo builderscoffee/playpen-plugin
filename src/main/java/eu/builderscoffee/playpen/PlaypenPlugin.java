@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 
 import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 import static eu.builderscoffee.api.common.configuration.Configuration.readOrCreateConfiguration;
 
@@ -60,13 +61,12 @@ public class PlaypenPlugin extends AbstractPlugin {
         DataManager.init(getSettingsConfig().getMysql().toHikari());
 
         // Tâche Heartbeats
-        val timer = new Timer();
-        timer.scheduleAtFixedRate(new HeartbeartsTask(), 5 * 1000, 5 * 1000);
+        Network.get().getScheduler().scheduleAtFixedRate(new HeartbeartsTask(), 5, 5, TimeUnit.SECONDS);
 
         // Clear servers information
         Redis.getRedissonClient().getSortedSet("servers").clear();
 
-        timer.scheduleAtFixedRate(StaticServersTask.getInstance(), 10 * 1000, 30 * 1000);
+        Network.get().getScheduler().scheduleAtFixedRate(StaticServersTask.getInstance(), 10, 30, TimeUnit.SECONDS);
 
         LogUtils.debug("Starting networks listeners");
         return Network.get().getEventManager().registerListener(new NetworkListener());
@@ -74,6 +74,8 @@ public class PlaypenPlugin extends AbstractPlugin {
 
     @Override
     public void onStop() {
+        // Clear servers information
+        Redis.getRedissonClient().getSortedSet("servers").clear();
         Redis.close();
     }
 }
